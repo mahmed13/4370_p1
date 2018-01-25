@@ -189,12 +189,11 @@ public class Table
         out.println ("RA> " + name + ".select (" + keyVal + ")");        
         List <Comparable []> rows = new ArrayList <> ();
         
-        // find index of projected attributes in table attributes
+        // find index of key attributes in table attributes
         List <Integer> key_indecies = new ArrayList <> ();
         for (String k : key) key_indecies.add(Arrays.asList(this.attribute).indexOf(k));
         
         for(Comparable [] tup : tuples) { // rows
-            List <Comparable> row_al = new ArrayList <> (); // ArrayList are easier to manipulate, converts back to array after adding elements
             	for (int i = 0; i< tup.length; i++ ) { // columns
             		if(key_indecies.contains(i)) { 
             			if(new KeyType(tup[i]).hashCode() == keyVal.hashCode()) {
@@ -219,10 +218,43 @@ public class Table
     {
         out.println ("RA> " + name + ".union (" + table2.name + ")");
         if (! compatible (table2)) return null;
-
         List <Comparable []> rows = new ArrayList <> ();
 
-        //  T O   B E   I M P L E M E N T E D 
+        // check if compatible keys
+        if (!(Arrays.equals(key, table2.key))) {
+        		out.println("Error tables have different keys");
+        		return null;
+        }
+        
+        // find index of key attributes in table attributes
+        List <Integer> key_indecies = new ArrayList <> ();
+        for (String k : key) key_indecies.add(Arrays.asList(this.attribute).indexOf(k));
+        
+        List <Integer> key_value_hashes = new ArrayList <> (); // keep track of key values to avoid duplicates
+
+        // add all table 1 rows
+        for(Comparable [] tup : tuples) {
+        		rows.add(tup);
+        		List <Comparable> temp = new ArrayList <> ();
+
+        		for(int i : key_indecies) {
+        			temp.add(tup[i]);
+        		}
+    			key_value_hashes.add((new KeyType(temp.toArray(new Comparable[temp.size()]))).hashCode());
+        }
+        
+        // compare then add table 2 rows
+        for(Comparable [] tup : table2.tuples) {
+	        	List <Comparable> temp = new ArrayList <> ();
+	
+	    		for(int i : key_indecies) {
+	    			temp.add(tup[i]);
+	    		}
+	    		
+	    		if(! key_value_hashes.contains((new KeyType(temp.toArray(new Comparable[temp.size()]))).hashCode())) {
+				rows.add(tup);
+			}
+        }
 
         return new Table (name + count++, attribute, domain, key, rows);
     } // union
