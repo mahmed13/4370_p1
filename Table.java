@@ -183,29 +183,27 @@ public class Table
      * @param keyVal  the given key value
      * @return  a table with the tuple satisfying the key predicate
      */
-    public Table select (KeyType keyVal)// To do
+    public Table select (KeyType keyVal)// Finished
     {
     	
-        out.println ("RA> " + name + ".select (" + keyVal + ")");
-        out.println(keyVal.compareTo(new KeyType("Harrison_Ford", "Beverly_Hills")));
-        
-        
+        out.println ("RA> " + name + ".select (" + keyVal + ")");        
         List <Comparable []> rows = new ArrayList <> ();
         
-        //  T O   B E   I M P L E M E N T E D 
-        String beg = "( ";
-        String end = " )";
-        String answer = keyVal.toString().substring(keyVal.toString().indexOf(beg)+beg.length(),keyVal.toString().indexOf(end));
-        out.println(answer);
-
+        // find index of projected attributes in table attributes
+        List <Integer> key_indecies = new ArrayList <> ();
+        for (String k : key) key_indecies.add(Arrays.asList(this.attribute).indexOf(k));
+        
         for(Comparable [] tup : tuples) { // rows
-            if(Arrays.asList(tup).containsAll(Arrays.asList("Harrison_Ford","Beverly_Hills"))) out.println("Success");
-            for(Comparable attr : tup) { // columns
-            		out.print(attr+"     ");
-            }
-            out.println();
+            List <Comparable> row_al = new ArrayList <> (); // ArrayList are easier to manipulate, converts back to array after adding elements
+            	for (int i = 0; i< tup.length; i++ ) { // columns
+            		if(key_indecies.contains(i)) { 
+            			if(new KeyType(tup[i]).hashCode() == keyVal.hashCode()) {
+            				rows.add(tup);
+            			}
+            		}
             	}
-
+        	}
+        
         return new Table (name + count++, attribute, domain, key, rows);
     } // select
 
