@@ -128,7 +128,7 @@ public class Table
      * Check whether the original key is included in the projection.
      *
      * #usage movie.project ("title year studioNo")
-     *
+     * @author ahmed
      * @param attributes  the attributes to project onto
      * @return  a table of projected tuples
      */
@@ -155,7 +155,6 @@ public class Table
             rows.add(row);
         }
 
-        
         return new Table (name + count++, attrs, colDomain, newKey, rows);
     } // project
 
@@ -179,7 +178,7 @@ public class Table
     /************************************************************************************
      * Select the tuples satisfying the given key predicate (key = value).  Use an index
      * (Map) to retrieve the tuple with the given key value.
-     *
+     * @author ahmed
      * @param keyVal  the given key value
      * @return  a table with the tuple satisfying the key predicate
      */
@@ -210,7 +209,7 @@ public class Table
      * Union this table and table2.  Check that the two tables are compatible.
      *
      * #usage movie.union (show)
-     *
+     * @author ahmed
      * @param table2  the rhs table in the union operation
      * @return  a table representing the union
      */
@@ -264,7 +263,7 @@ public class Table
      * compatible.
      *
      * #usage movie.minus (show)
-     *
+     * @author ahmed
      * @param table2  The rhs table in the minus operation
      * @return  a table representing the difference
      */
@@ -275,7 +274,40 @@ public class Table
 
         List <Comparable []> rows = new ArrayList <> ();
 
-        //  T O   B E   I M P L E M E N T E D 
+     // check if compatible keys
+        if (!(Arrays.equals(key, table2.key))) {
+        		out.println("Error tables have different keys");
+        		return null;
+        }
+        
+        // find index of key attributes in table attributes
+        List <Integer> key_indecies = new ArrayList <> ();
+        for (String k : key) key_indecies.add(Arrays.asList(this.attribute).indexOf(k));
+        
+        List <Integer> key_value_hashes = new ArrayList <> (); // keep track of key values to avoid duplicates
+
+        // add all table 1 rows
+        for(Comparable [] tup : tuples) {
+        		rows.add(tup);
+        		List <Comparable> temp = new ArrayList <> ();
+
+        		for(int i : key_indecies) {
+        			temp.add(tup[i]);
+        		}
+    			key_value_hashes.add((new KeyType(temp.toArray(new Comparable[temp.size()]))).hashCode());
+        }
+        // compare then add table 2 rows
+        for(Comparable [] tup : table2.tuples) {
+	        	List <Comparable> temp = new ArrayList <> ();
+	        	
+	    		for(int i : key_indecies) {
+	    			temp.add(tup[i]);
+	    		}
+	    		
+	    		if(key_value_hashes.contains((new KeyType(temp.toArray(new Comparable[temp.size()]))).hashCode())) {
+				rows.remove(tup);
+			}
+        }
 
         return new Table (name + count++, attribute, domain, key, rows);
     } // minus
@@ -449,8 +481,7 @@ public class Table
         File directory = new File(DIR);
         if (! directory.exists()){
             directory.mkdir();
-        }
-        	//
+        }//
         
         try {
         		ObjectOutputStream oos = new ObjectOutputStream (new FileOutputStream (DIR + name + EXT));
