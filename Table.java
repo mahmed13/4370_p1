@@ -80,7 +80,7 @@ public class Table
         domain    = _domain;
         key       = _key;
         tuples    = new ArrayList <> ();
-      index     = new TreeMap <> ();       // also try BPTreeMap, LinHashMap or ExtHashMap
+        index     = new TreeMap <> ();       // also try BPTreeMap, LinHashMap or ExtHashMap
 //        index     = new LinHashMap <> (KeyType.class, Comparable [].class);
 
     } // constructor
@@ -274,7 +274,7 @@ public class Table
 
         List <Comparable []> rows = new ArrayList <> ();
 
-     // check if compatible keys
+        // check if compatible keys
         if (!(Arrays.equals(key, table2.key))) {
         		out.println("Error tables have different keys");
         		return null;
@@ -318,7 +318,7 @@ public class Table
      * names by append "2" to the end of any duplicate attribute name.
      *
      * #usage movie.join ("studioNo", "name", studio)
-     *
+     * @author Charles Lu
      * @param attribute1  the attributes of this table to be compared (Foreign Key)
      * @param attribute2  the attributes of table2 to be compared (Primary Key)
      * @param table2      the rhs table in the join operation
@@ -331,11 +331,27 @@ public class Table
 
         String [] t_attrs = attributes1.split (" ");
         String [] u_attrs = attributes2.split (" ");
-
+        
         List <Comparable []> rows = new ArrayList <> ();
-
-        //  T O   B E   I M P L E M E N T E D 
-
+        
+        for (String t : t_attrs)
+        {
+        	for (String u : u_attrs)
+        	{
+        		for (Comparable[] tuple1 : this.tuples)
+        		{
+        			for (Comparable[] tuple2 : table2.tuples)
+        			{
+        				if (tuple1[this.col(t)] == tuple2[table2.col(u)])
+        				{
+        					rows.add(ArrayUtil.concat(tuple1, tuple2));
+        				}
+        			}
+        		}
+        	}
+        }
+        
+        
         return new Table (name + count++, ArrayUtil.concat (attribute, table2.attribute),
                                           ArrayUtil.concat (domain, table2.domain), key, rows);
     } // join
@@ -356,7 +372,8 @@ public class Table
 
         List <Comparable []> rows = new ArrayList <> ();
 
-        //  T O   B E   I M P L E M E N T E D 
+        //  T O   B E   I M P L E M E N T E D
+        
 
         // FIX - eliminate duplicate columns
         return new Table (name + count++, ArrayUtil.concat (attribute, table2.attribute),
@@ -563,14 +580,28 @@ public class Table
     /************************************************************************************
      * Check the size of the tuple (number of elements in list) as well as the type of
      * each value to ensure it is from the right domain. 
-     *
+     * @author Charles Lu
      * @param t  the tuple as a list of attribute values
      * @return  whether the tuple has the right size and values that comply
      *          with the given domains
      */
     private boolean typeCheck (Comparable [] t)
     { 
-        //  T O   B E   I M P L E M E N T E D 
+    	if ((t.length != 0) && (!tuples.isEmpty() ))
+		{
+    		if (t.length != tuples.get(0).length)
+    		{
+    			return false;
+    		}
+    		for (int i=0; i < t.length; i++)
+    		{	// ugly but it works...
+    			if (!t[i].getClass().getSimpleName().equals(tuples.get(0)[i].getClass().getSimpleName()))
+    			{
+    				out.println("Type Check Error: " + t[i] + " has wrong class type " + t[i].getClass());
+    				return false;
+    			}
+    		}
+		}
 
         return true;
     } // typeCheck
