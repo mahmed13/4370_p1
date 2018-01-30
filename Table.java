@@ -372,10 +372,55 @@ public class Table
 
         List <Comparable []> rows = new ArrayList <> ();
 
-        //  T O   B E   I M P L E M E N T E D
-        
+        boolean flag = true;
+		Comparable x1, x2;
+		int i = 0;
+	  	int j = 0;
 
-        // FIX - eliminate duplicate columns
+		for(Comparable[] tuple1 : this.tuples)
+		{
+			for(Comparable[] tuple2 : table2.tuples)
+			{
+				i = 0;
+			  	j = 0;
+			  	flag = true;
+			  	while (flag)
+			  	{
+			  		x1 = tuple1[i];
+			  		x2 = tuple2[j];
+			  		if (x1 == x2) 
+			  		{
+			  			rows.add(ArrayUtil.concat(tuple1, tuple2));
+			  			flag = false;
+			  		}
+			  		else 
+			  		{
+			  			if ( (tuple2.length - 1) <= j) 
+			  			{
+			  				if(i < tuple1.length-1) 
+			  				{
+			  					j=0;
+			  					i++;
+			  					
+			  				}
+			  				else 
+			  				{
+			  					flag = false;
+			  				}
+			  			}
+			  			else if ( (tuple2.length - 1) > j)
+			  			{
+			  				j++;
+			  			}
+			  			else 
+			  			{
+						  flag = false;
+			  			}
+			  		}
+			  	}
+			}
+		}
+
         return new Table (name + count++, ArrayUtil.concat (attribute, table2.attribute),
                                           ArrayUtil.concat (domain, table2.domain), key, rows);
     } // join
