@@ -1,1 +1,1 @@
-### SQL style database implemented in java
+SQL style database implemented in java
